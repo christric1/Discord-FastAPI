@@ -69,24 +69,21 @@ def drawLots()-> dict:
     return myDict
 
 def getHentai(driver: webdriver.Chrome, name: str) -> list:
-    driver.get("https://www.wnacg.com/albums.html")
+    driver.get(f"https://jcomic.net/search/{name}")
 
-    input = driver.find_element(By.NAME, "q")
-    input.send_keys(name)
-    input.submit()
-
-    element = WebDriverWait(driver, WAIT_TIME).until(
-        EC.presence_of_all_elements_located((By.CLASS_NAME, "title"))
+    elements = WebDriverWait(driver, WAIT_TIME).until(
+        EC.presence_of_all_elements_located((By.CLASS_NAME, "comic-title"))
     )
-    
+
     myList = []
-    for index, i in enumerate(element):
+    for index, e in enumerate(elements):
         if index == MAX_RESULTS:
             break
-        obj = i.find_element(By.TAG_NAME, "a")
-        title = obj.get_attribute("title").replace('<em>', '').replace('</em>', '')
-        href = obj.get_attribute("href").replace('<em>', '').replace('</em>', '')
-        
+
+        title = e.text.strip()
+        parent_href = e.find_element(By.XPATH, "./ancestor::a[1]")
+        href = parent_href.get_attribute("href")
+
         myDict = {
             "title": title,
             "src": href
